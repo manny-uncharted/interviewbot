@@ -1,0 +1,535 @@
+[
+    {
+        "id": "asst_nlpcZ6kY87EFWuHoUhPmApKt",
+        "created_at": 1731537654,
+        "description": "The InterviewCoordinator agent manages the overall interview flow and candidate interactions. It starts with a warm and welcome greeting once the page loads and introduces the candidate to the interview format, controls the sequence of questions and phases, adapts questions based on candidate responses, and summarizes the interview outcome. It uses Gradio UI for the frontend interface and communicates with the EvaluationAgent and KnowledgeRetrievalAgent.",
+        "instructions": "### InterviewBot Agency Manifesto\n\n#### Mission:\n\nTo streamline and elevate the technical interview process by leveraging an AI-powered multi-agent system. Using Agency Swarm, the InterviewBot will conduct interactive, adaptive technical interviews with developer candidates, providing real-time assessment and feedback based on predefined criteria. This approach enables efficient, data-driven evaluations of candidate skills and knowledge.\n\n#### Goals:\n\n* Conduct seamless technical interviews, including assessments in Python programming, APIs, cloud, containerization, and the Agency Swarm framework.\n* Reference relevant documentation to support interview questions and clarify technical concepts on request.\n* Automate candidate assessment by recording and scoring responses to predefined questions and saving the results for further review.\n* Facilitate an interactive interview experience using Gradio UI for straightforward candidate interaction.\n\n# InterviewCoordinator Agent Instructions\n\nYou are an agent that manages the overall interview flow and candidate interactions. Your primary responsibilities include greeting and introducing the candidate to the interview format, controlling the sequence of questions and phases, adapting questions based on candidate responses, and summarizing the interview outcome.\n\n### Primary Instructions:\n\n1. Use Gradio UI to create a user-friendly interface for candidates and start with an initial warm welcome greeting\n2. Greet the candidate and introduce them to the interview format and process.\n3. Control the sequence of questions and phases throughout the interview.\n4. Adapt questions based on candidate responses to ensure a personalized interview experience.\n5. Communicate with the EvaluationAgent to assess candidate responses in real-time and save the results in json\u03a9\n6. Collaborate with the KnowledgeRetrievalAgent to provide relevant documentation and clarification on technical concepts when needed.\n7. Summarize the interview outcome and provide feedback to the candidate.\n8. Ensure all interactions are logged and recorded for future reference and analysis.\n",
+        "metadata": {},
+        "model": "gpt-4o-2024-08-06",
+        "name": "InterviewCoordinator",
+        "object": "assistant",
+        "tools": [
+            {
+                "function": {
+                    "name": "CandidateInteractionTool",
+                    "description": "This tool handles greeting the candidate and introducing them to the interview format.\nIt provides a welcoming message and outlines the structure of the interview to set the candidate at ease.",
+                    "parameters": {
+                        "properties": {
+                            "candidate_name": {
+                                "description": "The name of the candidate to personalize the greeting.",
+                                "title": "Candidate Name",
+                                "type": "string"
+                            },
+                            "interview_structure": {
+                                "description": "A brief description of the interview structure.",
+                                "title": "Interview Structure",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "candidate_name",
+                            "interview_structure"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            },
+            {
+                "function": {
+                    "name": "InterviewFlowManagerTool",
+                    "description": "This tool manages the sequence of questions and phases during the interview.\nIt adapts questions based on candidate responses, ensuring a smooth and logical\nflow of the interview process.",
+                    "parameters": {
+                        "properties": {
+                            "initial_question": {
+                                "description": "The initial question to start the interview.",
+                                "title": "Initial Question",
+                                "type": "string"
+                            },
+                            "follow_up_questions": {
+                                "description": "A dictionary mapping keywords in responses to follow-up questions.",
+                                "title": "Follow Up Questions",
+                                "type": "object"
+                            }
+                        },
+                        "required": [
+                            "follow_up_questions",
+                            "initial_question"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            },
+            {
+                "function": {
+                    "name": "InterviewSummaryTool",
+                    "description": "This tool summarizes the interview outcome. It compiles key points from the interview,\nincluding candidate strengths, areas for improvement, and overall performance.\nThe summary is concise and informative.",
+                    "parameters": {
+                        "properties": {
+                            "candidate_name": {
+                                "description": "The name of the candidate being summarized.",
+                                "title": "Candidate Name",
+                                "type": "string"
+                            },
+                            "strengths": {
+                                "description": "A summary of the candidate's strengths observed during the interview.",
+                                "title": "Strengths",
+                                "type": "string"
+                            },
+                            "areas_for_improvement": {
+                                "description": "A summary of the areas where the candidate can improve.",
+                                "title": "Areas For Improvement",
+                                "type": "string"
+                            },
+                            "overall_performance": {
+                                "description": "An overall assessment of the candidate's performance.",
+                                "title": "Overall Performance",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "areas_for_improvement",
+                            "candidate_name",
+                            "overall_performance",
+                            "strengths"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            },
+            {
+                "function": {
+                    "name": "GradioInterfaceTool",
+                    "description": "This tool handles the Gradio UI for the frontend interface, allowing the InterviewCoordinator agent\nto interact with candidates. It displays questions, receives candidate responses, and shows any\nnecessary instructions or information during the interview process.",
+                    "parameters": {
+                        "properties": {
+                            "question": {
+                                "description": "The question to be displayed to the candidate.",
+                                "title": "Question",
+                                "type": "string"
+                            },
+                            "instructions": {
+                                "default": "",
+                                "description": "Any additional instructions or information to be shown to the candidate.",
+                                "title": "Instructions",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "question"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            },
+            {
+                "function": {
+                    "name": "CommunicationTool",
+                    "description": "This tool facilitates communication with the EvaluationAgent and KnowledgeRetrievalAgent.\nIt can send and receive messages, ensuring smooth collaboration between agents during the interview process.",
+                    "parameters": {
+                        "properties": {
+                            "message_to_send": {
+                                "description": "The message to be sent to another agent.",
+                                "title": "Message To Send",
+                                "type": "string"
+                            },
+                            "received_message": {
+                                "default": null,
+                                "description": "The message received from another agent.",
+                                "title": "Received Message",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "message_to_send"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            },
+            {
+                "function": {
+                    "name": "SendMessage",
+                    "description": "Use this tool to facilitate direct, synchronous communication between specialized agents within your agency. When you send a message using this tool, you receive a response exclusively from the designated recipient agent. To continue the dialogue, invoke this tool again with the desired recipient agent and your follow-up message. Remember, communication here is synchronous; the recipient agent won't perform any tasks post-response. You are responsible for relaying the recipient agent's responses back to the user, as the user does not have direct access to these replies. Keep engaging with the tool for continuous interaction until the task is fully resolved. Do not send more than 1 message at a time.",
+                    "parameters": {
+                        "$defs": {
+                            "recipient": {
+                                "enum": [
+                                    "EvaluationAgent",
+                                    "KnowledgeRetrievalAgent"
+                                ],
+                                "title": "recipient",
+                                "type": "string"
+                            }
+                        },
+                        "properties": {
+                            "my_primary_instructions": {
+                                "description": "Please repeat your primary instructions step-by-step, including both completed and the following next steps that you need to perform. For multi-step, complex tasks, first break them down into smaller steps yourself. Then, issue each step individually to the recipient agent via the message parameter. Each identified step should be sent in separate message. Keep in mind, that the recipient agent does not have access to these instructions. You must include recipient agent-specific instructions in the message or additional_instructions parameters.",
+                                "title": "My Primary Instructions",
+                                "type": "string"
+                            },
+                            "recipient": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/$defs/recipient"
+                                    }
+                                ],
+                                "description": "EvaluationAgent: An agent that evaluates candidate responses using an LLM, stores feedback, and calculates scores based on predefined criteria.\nKnowledgeRetrievalAgent: The KnowledgeRetrievalAgent retrieves relevant information from the knowledge base to assist with context-specific questions. It scrapes data from specified URLs in urls.txt and additional files like cursorrules.txt, adds them to the Pinecone vector database using OpenAI's embedding models. It parses and indexes documents, handles requests for clarifications or topic-specific information, and dynamically supplies the InterviewCoordinator with pertinent information for deeper interview questions.\n"
+                            },
+                            "message": {
+                                "description": "Specify the task required for the recipient agent to complete. Focus on clarifying what the task entails, rather than providing exact instructions.",
+                                "title": "Message",
+                                "type": "string"
+                            },
+                            "message_files": {
+                                "anyOf": [
+                                    {
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "default": null,
+                                "description": "A list of file ids to be sent as attachments to this message. Only use this if you have the file id that starts with 'file-'.",
+                                "examples": [
+                                    "file-1234",
+                                    "file-5678"
+                                ],
+                                "title": "Message Files"
+                            },
+                            "additional_instructions": {
+                                "anyOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "default": null,
+                                "description": "Additional context or instructions for the recipient agent about the task. For example, additional information provided by the user or other agents.",
+                                "title": "Additional Instructions"
+                            }
+                        },
+                        "required": [
+                            "message",
+                            "my_primary_instructions",
+                            "recipient"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            }
+        ],
+        "response_format": "auto",
+        "temperature": 0.3,
+        "tool_resources": {
+            "code_interpreter": null,
+            "file_search": null
+        },
+        "top_p": 1.0
+    },
+    {
+        "id": "asst_aQgc6y5rBJDn0ObxgZFArwtj",
+        "created_at": 1731550863,
+        "description": "An agent that evaluates candidate responses using an LLM, stores feedback, and calculates scores based on predefined criteria.",
+        "instructions": "### InterviewBot Agency Manifesto\n\n#### Mission:\n\nTo streamline and elevate the technical interview process by leveraging an AI-powered multi-agent system. Using Agency Swarm, the InterviewBot will conduct interactive, adaptive technical interviews with developer candidates, providing real-time assessment and feedback based on predefined criteria. This approach enables efficient, data-driven evaluations of candidate skills and knowledge.\n\n#### Goals:\n\n* Conduct seamless technical interviews, including assessments in Python programming, APIs, cloud, containerization, and the Agency Swarm framework.\n* Reference relevant documentation to support interview questions and clarify technical concepts on request.\n* Automate candidate assessment by recording and scoring responses to predefined questions and saving the results for further review.\n* Facilitate an interactive interview experience using Gradio UI for straightforward candidate interaction.\n\n# EvaluationAgent Instructions\n\nYou are an agent that evaluates and scores candidate responses in real-time using an LLM and the provided Candidate_Criteria_Sheet.xlsx. Your primary responsibilities include analyzing each response for relevance, accuracy, and completeness, scoring responses based on predefined criteria, and storing scores and feedback in a structured JSON file for each candidate.\n\n### Primary Instructions:\n\n1. Use the provided Candidate_Criteria_Sheet.csv to understand the predefined criteria for scoring.\n2. Analyze each candidate response for relevance, accuracy, and completeness using an LLM.\n3. Score each response based on the predefined criteria from the Candidate_Criteria_Sheet.csv\n4. Store scores and feedback in a structured json file for each candidate.\n5. Communicate with the InterviewCoordinator to confirm scores and log results.\n6. Ensure all evaluations are logged and stored for future reference and analysis.\n",
+        "metadata": {},
+        "model": "gpt-4o-2024-08-06",
+        "name": "EvaluationAgent",
+        "object": "assistant",
+        "tools": [
+            {
+                "type": "code_interpreter"
+            },
+            {
+                "function": {
+                    "name": "ScoringTool",
+                    "description": "This tool applies the extracted criteria to score candidate responses.\nIt takes the evaluation results from the LLM and the criteria from the CriteriaSheetParserTool\nto calculate a final score for each response.",
+                    "parameters": {
+                        "properties": {
+                            "evaluation_results": {
+                                "additionalProperties": {
+                                    "type": "number"
+                                },
+                                "description": "The evaluation results from the LLM, with criteria as keys and scores as values.",
+                                "title": "Evaluation Results",
+                                "type": "object"
+                            },
+                            "criteria": {
+                                "description": "The list of criteria extracted from the CriteriaSheetParserTool.",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "title": "Criteria",
+                                "type": "array"
+                            }
+                        },
+                        "required": [
+                            "criteria",
+                            "evaluation_results"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            },
+            {
+                "function": {
+                    "name": "LLMEvaluationTool",
+                    "description": "This tool uses OpenAI's language model to evaluate and score candidate responses based on specified criteria.\nIt leverages OpenAI's LLM API to analyze the responses and return evaluation feedback.",
+                    "parameters": {
+                        "properties": {
+                            "candidate_response": {
+                                "description": "The candidate's response to be evaluated.",
+                                "title": "Candidate Response",
+                                "type": "string"
+                            },
+                            "evaluation_criteria": {
+                                "description": "The criteria for evaluating the response, such as relevance, accuracy, and completeness.",
+                                "title": "Evaluation Criteria",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "candidate_response",
+                            "evaluation_criteria"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            },
+            {
+                "function": {
+                    "name": "FeedbackStorageTool",
+                    "description": "This tool stores scores and feedback in a structured JSON file for each candidate.\nIt takes the candidate's name, scores, and feedback, and saves them in a JSON format,\nensuring data is organized and easily retrievable.",
+                    "parameters": {
+                        "properties": {
+                            "candidate_name": {
+                                "description": "The name of the candidate.",
+                                "title": "Candidate Name",
+                                "type": "string"
+                            },
+                            "scores": {
+                                "description": "The final score of the candidate.",
+                                "title": "Scores",
+                                "type": "number"
+                            },
+                            "feedback": {
+                                "description": "The feedback for the candidate.",
+                                "title": "Feedback",
+                                "type": "string"
+                            },
+                            "file_path": {
+                                "description": "The file path to store the JSON data.",
+                                "title": "File Path",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "candidate_name",
+                            "feedback",
+                            "file_path",
+                            "scores"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            },
+            {
+                "function": {
+                    "name": "CriteriaLoaderTool",
+                    "description": "This tool loads evaluation criteria from the Candidate_Criteria_Sheet.csv file.",
+                    "parameters": {
+                        "properties": {
+                            "file_path": {
+                                "description": "The path to the Candidate_Criteria_Sheet.csv file.",
+                                "title": "File Path",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "file_path"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            },
+            {
+                "function": {
+                    "name": "SendMessage",
+                    "description": "Use this tool to facilitate direct, synchronous communication between specialized agents within your agency. When you send a message using this tool, you receive a response exclusively from the designated recipient agent. To continue the dialogue, invoke this tool again with the desired recipient agent and your follow-up message. Remember, communication here is synchronous; the recipient agent won't perform any tasks post-response. You are responsible for relaying the recipient agent's responses back to the user, as the user does not have direct access to these replies. Keep engaging with the tool for continuous interaction until the task is fully resolved. Do not send more than 1 message at a time.",
+                    "parameters": {
+                        "$defs": {
+                            "recipient": {
+                                "const": "KnowledgeRetrievalAgent",
+                                "enum": [
+                                    "KnowledgeRetrievalAgent"
+                                ],
+                                "title": "recipient",
+                                "type": "string"
+                            }
+                        },
+                        "properties": {
+                            "my_primary_instructions": {
+                                "description": "Please repeat your primary instructions step-by-step, including both completed and the following next steps that you need to perform. For multi-step, complex tasks, first break them down into smaller steps yourself. Then, issue each step individually to the recipient agent via the message parameter. Each identified step should be sent in separate message. Keep in mind, that the recipient agent does not have access to these instructions. You must include recipient agent-specific instructions in the message or additional_instructions parameters.",
+                                "title": "My Primary Instructions",
+                                "type": "string"
+                            },
+                            "recipient": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/$defs/recipient"
+                                    }
+                                ],
+                                "description": "KnowledgeRetrievalAgent: The KnowledgeRetrievalAgent retrieves relevant information from the knowledge base to assist with context-specific questions. It scrapes data from specified URLs in urls.txt and additional files like cursorrules.txt, adds them to the Pinecone vector database using OpenAI's embedding models. It parses and indexes documents, handles requests for clarifications or topic-specific information, and dynamically supplies the InterviewCoordinator with pertinent information for deeper interview questions.\n"
+                            },
+                            "message": {
+                                "description": "Specify the task required for the recipient agent to complete. Focus on clarifying what the task entails, rather than providing exact instructions.",
+                                "title": "Message",
+                                "type": "string"
+                            },
+                            "message_files": {
+                                "anyOf": [
+                                    {
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "default": null,
+                                "description": "A list of file ids to be sent as attachments to this message. Only use this if you have the file id that starts with 'file-'.",
+                                "examples": [
+                                    "file-1234",
+                                    "file-5678"
+                                ],
+                                "title": "Message Files"
+                            },
+                            "additional_instructions": {
+                                "anyOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "default": null,
+                                "description": "Additional context or instructions for the recipient agent about the task. For example, additional information provided by the user or other agents.",
+                                "title": "Additional Instructions"
+                            }
+                        },
+                        "required": [
+                            "message",
+                            "my_primary_instructions",
+                            "recipient"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            }
+        ],
+        "response_format": "auto",
+        "temperature": 0.3,
+        "tool_resources": {
+            "code_interpreter": {
+                "file_ids": [
+                    "file-Tl2TbteTB2KCJd21Qh0p7RyT"
+                ]
+            },
+            "file_search": null
+        },
+        "top_p": 1.0
+    },
+    {
+        "id": "asst_nzEYQiZCohmHefyR55N4wBQU",
+        "created_at": 1731550864,
+        "description": "The KnowledgeRetrievalAgent retrieves relevant information from the knowledge base to assist with context-specific questions. It scrapes data from specified URLs in urls.txt and additional files like cursorrules.txt, adds them to the Pinecone vector database using OpenAI's embedding models. It parses and indexes documents, handles requests for clarifications or topic-specific information, and dynamically supplies the InterviewCoordinator with pertinent information for deeper interview questions.",
+        "instructions": "### InterviewBot Agency Manifesto\n\n#### Mission:\n\nTo streamline and elevate the technical interview process by leveraging an AI-powered multi-agent system. Using Agency Swarm, the InterviewBot will conduct interactive, adaptive technical interviews with developer candidates, providing real-time assessment and feedback based on predefined criteria. This approach enables efficient, data-driven evaluations of candidate skills and knowledge.\n\n#### Goals:\n\n* Conduct seamless technical interviews, including assessments in Python programming, APIs, cloud, containerization, and the Agency Swarm framework.\n* Reference relevant documentation to support interview questions and clarify technical concepts on request.\n* Automate candidate assessment by recording and scoring responses to predefined questions and saving the results for further review.\n* Facilitate an interactive interview experience using Gradio UI for straightforward candidate interaction.\n\n# KnowledgeRetrievalAgent Instructions\n\nYou are an agent that retrieves relevant information from the knowledge base to assist with context-specific questions. Your primary responsibilities include scraping data from specified URLs in urls.txt and additional files like cursorrules.txt, adding them to the Pinecone vector database using OpenAI's embedding models, parsing and indexing documents provided, handling requests for clarifications or topic-specific information, and dynamically supplying the InterviewCoordinator with pertinent information for deeper interview questions.\n\n### Primary Instructions:\n1. Scrape data from specified URLs in urls.txt and additional files like cursorrules.txt.\n2. Add the scraped data to the Pinecone vector database using OpenAI's embedding models.\n3. Parse and index documents provided to create a searchable knowledge base.\n4. Handle requests for clarifications or topic-specific information from the InterviewCoordinator.\n5. Use a simple RAG (Retrieval-Augmented Generation) system, potentially with Faiss or another vector database for document indexing and retrieval.\n6. Utilize the OpenAI Chat Completion API for advanced responses or generating clarifications when additional knowledge retrieval is needed.\n7. Dynamically supply the InterviewCoordinator with pertinent information for deeper interview questions.\n8. Ensure all interactions and retrieved information are logged for future reference and analysis.",
+        "metadata": {},
+        "model": "gpt-4o-2024-08-06",
+        "name": "KnowledgeRetrievalAgent",
+        "object": "assistant",
+        "tools": [
+            {
+                "type": "file_search",
+                "file_search": {
+                    "max_num_results": null,
+                    "ranking_options": {
+                        "score_threshold": 0.0,
+                        "ranker": "default_2024_08_21"
+                    }
+                }
+            },
+            {
+                "function": {
+                    "name": "DocumentParserIndexerTool",
+                    "description": "This tool parses and indexes documents for efficient searching and retrieval.\nIt reads various document formats, extracts text content, and creates an index\nfor efficient searching and retrieval of relevant information.",
+                    "parameters": {
+                        "properties": {
+                            "document_paths": {
+                                "description": "A list of file paths to the documents to be parsed and indexed.",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "title": "Document Paths",
+                                "type": "array"
+                            },
+                            "index_file_path": {
+                                "description": "The file path where the index will be saved as a JSON file.",
+                                "title": "Index File Path",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "document_paths",
+                            "index_file_path"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            }
+        ],
+        "response_format": "auto",
+        "temperature": 0.3,
+        "tool_resources": {
+            "code_interpreter": null,
+            "file_search": {
+                "vector_store_ids": [
+                    "vs_yUEIXvLSasWu8sM9Ka1evYSW"
+                ]
+            }
+        },
+        "top_p": 1.0
+    }
+]

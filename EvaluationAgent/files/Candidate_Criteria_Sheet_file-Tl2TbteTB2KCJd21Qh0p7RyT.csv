@@ -1,0 +1,17 @@
+Criteria,Level,Description
+Problem Solving,5,"Strong problem-solving skills with hands-on experience. Demonstrated expertise in arrays, strings, sets, and maps. Easily made modifications to code as required."
+Problem Solving,4,"Good problem-solving skills on arrays, strings, sets, and maps but needed a few hints. Able to modify code with some assistance."
+Problem Solving,3,"Able to solve only basic problems of arrays, strings, sets, and maps but struggled to code and code modifications."
+Problem Solving,0,"No knowledge of basic coding concepts, including arrays, strings, sets, and maps. Unable to modify code according to changes."
+DSA,5,"Strong understanding of DSA with hands-on experience. Demonstrated expertise in arrays, linked lists, stacks, queues, trees, graphs, hashing, sorting algorithms, and dynamic programming. Easily made modifications to code as required."
+DSA,4,"Good understanding of DSA concepts like arrays, linked lists, stacks, queues, trees, graphs, hashing, sorting algorithms, and dynamic programming but needed a few hints. Able to modify code with some assistance."
+DSA,3,"Able to solve only basic DSA problems involving arrays, linked lists, stacks, queues, trees, graphs, hashing, sorting algorithms, and dynamic programming but struggled with coding and code modifications."
+DSA,0,"No knowledge of DSA fundamentals, including arrays, linked lists, stacks, queues, trees, graphs, hashing, sorting algorithms, and dynamic programming. Unable to modify code according to changes."
+Project,Exceptional,"Exceptional project with innovation. Strong technical skills. Clean, advanced, well-documented code. Clear presentation."
+Project,Solid,Solid project. Good technical knowledge. Functional features. Reasonably organized code. Adequate presentation.
+Project,Basic,Basic project. Adequate technical knowledge. Meets basic requirements. Functional code. Satisfactory presentation.
+Project,Lacks depth,Lacks depth. Limited technical knowledge. Basic functionality. Poorly organized code. Unclear presentation.
+Communication,Exceptional,"Exceptional clarity, confidence, and engagement. Strongly articulates ideas. Excellent audience interaction."
+Communication,Clear,Clear communication. Conveys ideas well. Adequate audience engagement.
+Communication,Basic,Basic communication. Conveys ideas with minor clarity issues. Sufficient audience engagement.
+Communication,Limited,Limited clarity. Struggles to convey ideas. Poor audience engagement.

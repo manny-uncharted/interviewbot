@@ -1,0 +1,6 @@
+.idea/
+.vscode/
+agency_requirements.md
+poetry.lock
+pyproject.toml
+__pycache__/
