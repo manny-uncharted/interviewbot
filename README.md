@@ -52,6 +52,7 @@ The frontend is powered by Gradio UI for an interactive and user-friendly experi
 
    ```
    OPENAI_API_KEY=your_openai_api_key_here
+   PINECONE_API_KEY=
    ```
 4. **Run Locally:**
    Use the following command to start the interview bot locally:
