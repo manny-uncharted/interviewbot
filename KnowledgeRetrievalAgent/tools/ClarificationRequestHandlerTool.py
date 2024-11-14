@@ -3,7 +3,7 @@ from pydantic import Field
 import openai
 from pinecone import Pinecone
 import os
-from InterviewBot.utils.constants import pinecone_api_key
+from utils.constants import pinecone_api_key
 
 
 pinecone = Pinecone(api_key=pinecone_api_key)
