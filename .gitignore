@@ -1,7 +1,7 @@
 .env
 .idea/
 .vscode/
-agency_requirements.md
+# agency_requirements.md
 poetry.lock
 pyproject.toml
 __pycache__/
