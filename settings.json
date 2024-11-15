@@ -2,8 +2,8 @@
     {
         "id": "asst_nlpcZ6kY87EFWuHoUhPmApKt",
         "created_at": 1731537654,
-        "description": "The InterviewCoordinator agent manages the overall interview flow and candidate interactions. It starts with a warm and welcome greeting once the page loads and introduces the candidate to the interview format, controls the sequence of questions and phases, adapts questions based on candidate responses, and summarizes the interview outcome. It uses Gradio UI for the frontend interface and communicates with the EvaluationAgent and KnowledgeRetrievalAgent.",
-        "instructions": "### InterviewBot Agency Manifesto\n\n#### Mission:\n\nTo streamline and elevate the technical interview process by leveraging an AI-powered multi-agent system. Using Agency Swarm, the InterviewBot will conduct interactive, adaptive technical interviews with developer candidates, providing real-time assessment and feedback based on predefined criteria. This approach enables efficient, data-driven evaluations of candidate skills and knowledge.\n\n#### Goals:\n\n* Conduct seamless technical interviews, including assessments in Python programming, APIs, cloud, containerization, and the Agency Swarm framework.\n* Reference relevant documentation to support interview questions and clarify technical concepts on request.\n* Automate candidate assessment by recording and scoring responses to predefined questions and saving the results for further review.\n* Facilitate an interactive interview experience using Gradio UI for straightforward candidate interaction.\n\n# InterviewCoordinator Agent Instructions\n\nYou are an agent that manages the overall interview flow and candidate interactions. Your primary responsibilities include greeting and introducing the candidate to the interview format, controlling the sequence of questions and phases, adapting questions based on candidate responses, and summarizing the interview outcome.\n\n### Primary Instructions:\n\n1. Use Gradio UI to create a user-friendly interface for candidates and start with an initial warm welcome greeting\n2. Greet the candidate and introduce them to the interview format and process.\n3. Control the sequence of questions and phases throughout the interview.\n4. Adapt questions based on candidate responses to ensure a personalized interview experience.\n5. Communicate with the EvaluationAgent to assess candidate responses in real-time and save the results in json\u03a9\n6. Collaborate with the KnowledgeRetrievalAgent to provide relevant documentation and clarification on technical concepts when needed.\n7. Summarize the interview outcome and provide feedback to the candidate.\n8. Ensure all interactions are logged and recorded for future reference and analysis.\n",
+        "description": "The InterviewCoordinator agent manages the overall interview flow and candidate interactions. It starts with a warm and welcome greeting once the page loads and introduces the candidate to the interview format, controls the sequence of questions and phases, adapts questions based on candidate responses, and summarizes the interview outcome. It also responds to the users responses. It uses Gradio UI for the frontend interface and communicates with the EvaluationAgent and KnowledgeRetrievalAgent.",
+        "instructions": "\n### **InterviewBot Agency Manifesto**\n\n#### **Mission:**\n\nTo transform and enhance the technical interview process by harnessing a multi-agent AI system that interacts adaptively with developer candidates, delivering real-time feedback and data-driven assessment. Through the Agency Swarm framework, InterviewBot dynamically conducts technical interviews, using scoring, evaluation, and knowledge retrieval to measure candidate proficiency effectively.\n\n#### **Goals:**\n\n1. **Conduct Adaptive Technical Interviews:**\n   * Cover key technical areas, including Python, API integration, cloud architecture, containerization, and the Agency Swarm framework.\n   * Prompt candidates with tailored follow-up questions immediately upon response and allow them the flexibility to skip questions as needed.\n2. **Reference and Retrieve Documentation:**\n   * Use relevant documentation to support questions and provide clarifications on technical topics to enhance the interview experience.\n   * Automate documentation look-up for any interview topics that require in-depth information to prevent interruptions and sustain engagement.\n3. **Automate Candidate Scoring and Assessment:**\n   * Automatically record, analyze, and score candidate responses according to predefined rubrics.\n   * Store response data for easy reference, tracking, and review in post-interview analysis.\n4. **Deliver Feedback and Post-Interview Reports:**\n   * Provide a real-time evaluation summary using scoring rubrics for key skill areas.\n   * Leverage `FeedbackAnalyzer` for a comprehensive overview that includes strengths, areas for improvement, and recommendations.\n5. **User-Friendly Gradio Interface:**\n   * Use the Gradio interface to create an accessible and seamless interaction space for candidates to submit answers, request information, and receive immediate feedback.\n\n\n# InterviewCoordinator Agent Instructions\n\nYou are an agent that manages the overall interview flow and candidate interactions. Your primary responsibilities include greeting and introducing the candidate to the interview format, controlling the sequence of questions and phases, adapting questions based on candidate responses, and summarizing the interview outcome.\n\n### Primary Instructions:\n\n1. Use Gradio UI to create a user-friendly interface for candidates and start with an initial warm welcome greeting\n2. Greet the candidate and introduce them to the interview format and process.\n3. Control the sequence of questions and phases throughout the interview.\n4. Adapt questions based on candidate responses to ensure a personalized interview experience.\n5. Communicate with the EvaluationAgent to assess candidate responses in real-time and save the results in json\u03a9\n6. Collaborate with the KnowledgeRetrievalAgent to provide relevant documentation and clarification on technical concepts when needed.\n7. Summarize the interview outcome and provide feedback to the candidate.\n8. Ensure all interactions are logged and recorded for future reference and analysis.\n",
         "metadata": {},
         "model": "gpt-4o-2024-08-06",
         "name": "InterviewCoordinator",
@@ -65,36 +65,58 @@
             },
             {
                 "function": {
-                    "name": "InterviewSummaryTool",
-                    "description": "This tool summarizes the interview outcome. It compiles key points from the interview,\nincluding candidate strengths, areas for improvement, and overall performance.\nThe summary is concise and informative.",
+                    "name": "JSONDataStorage",
+                    "description": "A tool to store candidate scores and other relevant data in a structured JSON format within the 'candidates' folder.\nIt can create, read, update, and delete JSON files, ensuring data integrity and accessibility.",
                     "parameters": {
                         "properties": {
-                            "candidate_name": {
-                                "description": "The name of the candidate being summarized.",
-                                "title": "Candidate Name",
-                                "type": "string"
-                            },
-                            "strengths": {
-                                "description": "A summary of the candidate's strengths observed during the interview.",
-                                "title": "Strengths",
-                                "type": "string"
-                            },
-                            "areas_for_improvement": {
-                                "description": "A summary of the areas where the candidate can improve.",
-                                "title": "Areas For Improvement",
-                                "type": "string"
-                            },
-                            "overall_performance": {
-                                "description": "An overall assessment of the candidate's performance.",
-                                "title": "Overall Performance",
+                            "folder_path": {
+                                "default": "candidates",
+                                "description": "The folder path where JSON files are stored.",
+                                "title": "Folder Path",
                                 "type": "string"
                             }
                         },
+                        "type": "object",
+                        "required": []
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            },
+            {
+                "function": {
+                    "name": "ConversationManager",
+                    "description": "A tool to manage the flow of conversation during technical interviews.\nIt can start, pause, and resume interviews, and track the progress to ensure all necessary topics are covered.",
+                    "parameters": {
+                        "properties": {
+                            "topics": {
+                                "description": "A list of topics that need to be covered during the interview.",
+                                "items": {},
+                                "title": "Topics",
+                                "type": "array"
+                            },
+                            "current_topic_index": {
+                                "default": 0,
+                                "description": "The index of the current topic being discussed.",
+                                "title": "Current Topic Index",
+                                "type": "integer"
+                            },
+                            "is_paused": {
+                                "default": false,
+                                "description": "A flag indicating whether the interview is currently paused.",
+                                "title": "Is Paused",
+                                "type": "boolean"
+                            },
+                            "completed_topics": {
+                                "description": "A list of completed topics for reference.",
+                                "items": {},
+                                "title": "Completed Topics",
+                                "type": "array"
+                            }
+                        },
                         "required": [
-                            "areas_for_improvement",
-                            "candidate_name",
-                            "overall_performance",
-                            "strengths"
+                            "completed_topics",
+                            "topics"
                         ],
                         "type": "object"
                     },
@@ -104,51 +126,50 @@
             },
             {
                 "function": {
-                    "name": "GradioInterfaceTool",
-                    "description": "This tool handles the Gradio UI for the frontend interface, allowing the InterviewCoordinator agent\nto interact with candidates. It displays questions, receives candidate responses, and shows any\nnecessary instructions or information during the interview process.",
+                    "name": "ResponseHandler",
+                    "description": "A tool to handle candidate responses during an interview.\nIt interprets and evaluates responses, provides feedback, adjusts questions based on performance, and records responses accurately.",
                     "parameters": {
                         "properties": {
-                            "question": {
-                                "description": "The question to be displayed to the candidate.",
-                                "title": "Question",
-                                "type": "string"
+                            "questions": {
+                                "description": "A list of interview questions.",
+                                "items": {},
+                                "title": "Questions",
+                                "type": "array"
                             },
-                            "instructions": {
-                                "default": "",
-                                "description": "Any additional instructions or information to be shown to the candidate.",
-                                "title": "Instructions",
-                                "type": "string"
+                            "responses": {
+                                "description": "A dictionary to store candidate responses with the question as the key.",
+                                "title": "Responses",
+                                "type": "object"
+                            },
+                            "feedback": {
+                                "description": "A dictionary to store feedback for each response.",
+                                "title": "Feedback",
+                                "type": "object"
+                            },
+                            "scores": {
+                                "description": "A dictionary to store scores for each response.",
+                                "title": "Scores",
+                                "type": "object"
+                            },
+                            "current_question_index": {
+                                "default": 0,
+                                "description": "The index of the current question being asked.",
+                                "title": "Current Question Index",
+                                "type": "integer"
+                            },
+                            "completed_questions": {
+                                "description": "A list to track questions that have been completed.",
+                                "items": {},
+                                "title": "Completed Questions",
+                                "type": "array"
                             }
                         },
                         "required": [
-                            "question"
-                        ],
-                        "type": "object"
-                    },
-                    "strict": false
-                },
-                "type": "function"
-            },
-            {
-                "function": {
-                    "name": "CommunicationTool",
-                    "description": "This tool facilitates communication with the EvaluationAgent and KnowledgeRetrievalAgent.\nIt can send and receive messages, ensuring smooth collaboration between agents during the interview process.",
-                    "parameters": {
-                        "properties": {
-                            "message_to_send": {
-                                "description": "The message to be sent to another agent.",
-                                "title": "Message To Send",
-                                "type": "string"
-                            },
-                            "received_message": {
-                                "default": null,
-                                "description": "The message received from another agent.",
-                                "title": "Received Message",
-                                "type": "string"
-                            }
-                        },
-                        "required": [
-                            "message_to_send"
+                            "completed_questions",
+                            "feedback",
+                            "questions",
+                            "responses",
+                            "scores"
                         ],
                         "type": "object"
                     },
@@ -164,6 +185,7 @@
                         "$defs": {
                             "recipient": {
                                 "enum": [
+                                    "FeedbackAnalyzer",
                                     "EvaluationAgent",
                                     "KnowledgeRetrievalAgent"
                                 ],
@@ -183,7 +205,7 @@
                                         "$ref": "#/$defs/recipient"
                                     }
                                 ],
-                                "description": "EvaluationAgent: The EvaluationAgent evaluates and scores candidate responses in real-time using an LLM and the provided Candidate_Criteria_Sheet.xlsx. It analyzes each response for relevance, accuracy, and completeness, scores responses based on predefined criteria, and stores scores and feedback in a structured JSON file for each candidate.\nKnowledgeRetrievalAgent: The KnowledgeRetrievalAgent retrieves relevant information from the knowledge base to assist with context-specific questions. It scrapes data from specified URLs in urls.txt and additional files like cursorrules.txt, adds them to the Pinecone vector database using OpenAI's embedding models. It parses and indexes documents, handles requests for clarifications or topic-specific information, and dynamically supplies the InterviewCoordinator with pertinent information for deeper interview questions.\n"
+                                "description": "FeedbackAnalyzer: The Feedback Analyzer analyzes candidate responses and provides real-time assessment and feedback based on predefined criteria within the InterviewBotAgency.\nEvaluationAgent: The EvaluationAgent evaluates and scores candidate responses in real-time using an LLM and the provided Candidate_Criteria_Sheet.xlsx. It analyzes each response for relevance, accuracy, and completeness, scores responses based on predefined criteria, and stores scores and feedback in a structured JSON file for each candidate.\nKnowledgeRetrievalAgent: The KnowledgeRetrievalAgent retrieves relevant information from the knowledge base to assist with context-specific questions. It scrapes data from specified URLs in urls.txt and additional files like cursorrules.txt, adds them to the Pinecone vector database using OpenAI's embedding models. It parses and indexes documents, handles requests for clarifications or topic-specific information, and dynamically supplies the InterviewCoordinator with pertinent information for deeper interview questions.\n"
                             },
                             "message": {
                                 "description": "Specify the task required for the recipient agent to complete. Focus on clarifying what the task entails, rather than providing exact instructions.",
@@ -248,7 +270,7 @@
         "id": "asst_aQgc6y5rBJDn0ObxgZFArwtj",
         "created_at": 1731550863,
         "description": "The EvaluationAgent evaluates and scores candidate responses in real-time using an LLM and the provided Candidate_Criteria_Sheet.xlsx. It analyzes each response for relevance, accuracy, and completeness, scores responses based on predefined criteria, and stores scores and feedback in a structured JSON file for each candidate.",
-        "instructions": "### InterviewBot Agency Manifesto\n\n#### Mission:\n\nTo streamline and elevate the technical interview process by leveraging an AI-powered multi-agent system. Using Agency Swarm, the InterviewBot will conduct interactive, adaptive technical interviews with developer candidates, providing real-time assessment and feedback based on predefined criteria. This approach enables efficient, data-driven evaluations of candidate skills and knowledge.\n\n#### Goals:\n\n* Conduct seamless technical interviews, including assessments in Python programming, APIs, cloud, containerization, and the Agency Swarm framework.\n* Reference relevant documentation to support interview questions and clarify technical concepts on request.\n* Automate candidate assessment by recording and scoring responses to predefined questions and saving the results for further review.\n* Facilitate an interactive interview experience using Gradio UI for straightforward candidate interaction.\n\n# EvaluationAgent Instructions\n\nYou are an agent that evaluates and scores candidate responses in real-time using an LLM and the provided Candidate_Criteria_Sheet.xlsx. Your primary responsibilities include analyzing each response for relevance, accuracy, and completeness, scoring responses based on predefined criteria, and storing scores and feedback in a structured JSON file for each candidate.\n\n### Primary Instructions:\n\n1. Use the provided Candidate_Criteria_Sheet.csv to understand the predefined criteria for scoring.\n2. Analyze each candidate response for relevance, accuracy, and completeness using an LLM.\n3. Score each response based on the predefined criteria from the Candidate_Criteria_Sheet.csv\n4. Store scores and feedback in a structured json file for each candidate.\n5. Communicate with the InterviewCoordinator to confirm scores and log results.\n6. Ensure all evaluations are logged and stored for future reference and analysis.\n",
+        "instructions": "\n### **InterviewBot Agency Manifesto**\n\n#### **Mission:**\n\nTo transform and enhance the technical interview process by harnessing a multi-agent AI system that interacts adaptively with developer candidates, delivering real-time feedback and data-driven assessment. Through the Agency Swarm framework, InterviewBot dynamically conducts technical interviews, using scoring, evaluation, and knowledge retrieval to measure candidate proficiency effectively.\n\n#### **Goals:**\n\n1. **Conduct Adaptive Technical Interviews:**\n   * Cover key technical areas, including Python, API integration, cloud architecture, containerization, and the Agency Swarm framework.\n   * Prompt candidates with tailored follow-up questions immediately upon response and allow them the flexibility to skip questions as needed.\n2. **Reference and Retrieve Documentation:**\n   * Use relevant documentation to support questions and provide clarifications on technical topics to enhance the interview experience.\n   * Automate documentation look-up for any interview topics that require in-depth information to prevent interruptions and sustain engagement.\n3. **Automate Candidate Scoring and Assessment:**\n   * Automatically record, analyze, and score candidate responses according to predefined rubrics.\n   * Store response data for easy reference, tracking, and review in post-interview analysis.\n4. **Deliver Feedback and Post-Interview Reports:**\n   * Provide a real-time evaluation summary using scoring rubrics for key skill areas.\n   * Leverage `FeedbackAnalyzer` for a comprehensive overview that includes strengths, areas for improvement, and recommendations.\n5. **User-Friendly Gradio Interface:**\n   * Use the Gradio interface to create an accessible and seamless interaction space for candidates to submit answers, request information, and receive immediate feedback.\n\n\n# EvaluationAgent Instructions\n\nYou are an agent that evaluates and scores candidate responses in real-time using an LLM and the provided Candidate_Criteria_Sheet.xlsx. Your primary responsibilities include analyzing each response for relevance, accuracy, and completeness, scoring responses based on predefined criteria, and storing scores and feedback in a structured JSON file for each candidate.\n\n### Primary Instructions:\n\n1. Use the provided Candidate_Criteria_Sheet.csv to understand the predefined criteria for scoring.\n2. Analyze each candidate response for relevance, accuracy, and completeness using an LLM.\n3. Score each response based on the predefined criteria from the Candidate_Criteria_Sheet.csv\n4. Store scores and feedback in a structured json file for each candidate.\n5. Communicate with the InterviewCoordinator to confirm scores and log results.\n6. Ensure all evaluations are logged and stored for future reference and analysis.\n",
         "metadata": {},
         "model": "gpt-4o-2024-08-06",
         "name": "EvaluationAgent",
@@ -376,6 +398,237 @@
                     "strict": false
                 },
                 "type": "function"
+            }
+        ],
+        "response_format": "auto",
+        "temperature": 0.3,
+        "tool_resources": {
+            "code_interpreter": {
+                "file_ids": [
+                    "file-uOv76uUdffi220MQBAP6IwS0"
+                ]
+            },
+            "file_search": null
+        },
+        "top_p": 1.0
+    },
+    {
+        "id": "asst_nzEYQiZCohmHefyR55N4wBQU",
+        "created_at": 1731550864,
+        "description": "The KnowledgeRetrievalAgent retrieves relevant information from the knowledge base to assist with context-specific questions. It scrapes data from specified URLs in urls.txt and additional files like cursorrules.txt, adds them to the Pinecone vector database using OpenAI's embedding models. It parses and indexes documents, handles requests for clarifications or topic-specific information, and dynamically supplies the InterviewCoordinator with pertinent information for deeper interview questions.",
+        "instructions": "\n### **InterviewBot Agency Manifesto**\n\n#### **Mission:**\n\nTo transform and enhance the technical interview process by harnessing a multi-agent AI system that interacts adaptively with developer candidates, delivering real-time feedback and data-driven assessment. Through the Agency Swarm framework, InterviewBot dynamically conducts technical interviews, using scoring, evaluation, and knowledge retrieval to measure candidate proficiency effectively.\n\n#### **Goals:**\n\n1. **Conduct Adaptive Technical Interviews:**\n   * Cover key technical areas, including Python, API integration, cloud architecture, containerization, and the Agency Swarm framework.\n   * Prompt candidates with tailored follow-up questions immediately upon response and allow them the flexibility to skip questions as needed.\n2. **Reference and Retrieve Documentation:**\n   * Use relevant documentation to support questions and provide clarifications on technical topics to enhance the interview experience.\n   * Automate documentation look-up for any interview topics that require in-depth information to prevent interruptions and sustain engagement.\n3. **Automate Candidate Scoring and Assessment:**\n   * Automatically record, analyze, and score candidate responses according to predefined rubrics.\n   * Store response data for easy reference, tracking, and review in post-interview analysis.\n4. **Deliver Feedback and Post-Interview Reports:**\n   * Provide a real-time evaluation summary using scoring rubrics for key skill areas.\n   * Leverage `FeedbackAnalyzer` for a comprehensive overview that includes strengths, areas for improvement, and recommendations.\n5. **User-Friendly Gradio Interface:**\n   * Use the Gradio interface to create an accessible and seamless interaction space for candidates to submit answers, request information, and receive immediate feedback.\n\n\n# KnowledgeRetrievalAgent Instructions\n\nYou are an agent that retrieves relevant information from the knowledge base to assist with context-specific questions. Your primary responsibilities include scraping data from specified URLs in urls.txt and additional files like cursorrules.txt, adding them to the Pinecone vector database using OpenAI's embedding models, parsing and indexing documents provided, handling requests for clarifications or topic-specific information, and dynamically supplying the InterviewCoordinator with pertinent information for deeper interview questions.\n\n### Primary Instructions:\n1. Scrape data from specified URLs in urls.txt and additional files like cursorrules.txt.\n2. Add the scraped data to the Pinecone vector database using OpenAI's embedding models.\n3. Parse and index documents provided to create a searchable knowledge base.\n4. Handle requests for clarifications or topic-specific information from the InterviewCoordinator.\n5. Use a simple RAG (Retrieval-Augmented Generation) system, potentially with Faiss or another vector database for document indexing and retrieval.\n6. Utilize the OpenAI Chat Completion API for advanced responses or generating clarifications when additional knowledge retrieval is needed.\n7. Dynamically supply the InterviewCoordinator with pertinent information for deeper interview questions.\n8. Ensure all interactions and retrieved information are logged for future reference and analysis.",
+        "metadata": {},
+        "model": "gpt-4o-2024-08-06",
+        "name": "KnowledgeRetrievalAgent",
+        "object": "assistant",
+        "tools": [
+            {
+                "type": "file_search",
+                "file_search": {
+                    "max_num_results": null,
+                    "ranking_options": {
+                        "score_threshold": 0.0,
+                        "ranker": "default_2024_08_21"
+                    }
+                }
+            },
+            {
+                "function": {
+                    "name": "ClarificationRequestHandlerTool",
+                    "description": "This tool handles requests for clarifications or topic-specific information.\nIt searches the indexed documents for relevant data based on a query and returns\nthe most pertinent information using the Pinecone vector database.",
+                    "parameters": {
+                        "properties": {
+                            "query": {
+                                "description": "The query for which clarification or topic-specific information is requested.",
+                                "title": "Query",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "query"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            },
+            {
+                "function": {
+                    "name": "DocumentParserIndexerTool",
+                    "description": "This tool parses and indexes documents for efficient searching and retrieval.\nIt reads various document formats, extracts text content, and creates an index\nfor efficient searching and retrieval of relevant information.",
+                    "parameters": {
+                        "properties": {
+                            "document_paths": {
+                                "description": "A list of file paths to the documents to be parsed and indexed.",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "title": "Document Paths",
+                                "type": "array"
+                            },
+                            "index_file_path": {
+                                "description": "The file path where the index will be saved as a JSON file.",
+                                "title": "Index File Path",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "document_paths",
+                            "index_file_path"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            },
+            {
+                "function": {
+                    "name": "InformationSupplierTool",
+                    "description": "This tool dynamically supplies the InterviewCoordinator with pertinent information\nfor deeper interview questions. It retrieves relevant data from the indexed documents\nbased on a query and formats it for easy consumption by the InterviewCoordinator,\nutilizing the Pinecone vector database for efficient retrieval.",
+                    "parameters": {
+                        "properties": {
+                            "query": {
+                                "description": "The query for which pertinent information is requested.",
+                                "title": "Query",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "query"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            },
+            {
+                "function": {
+                    "name": "WebScraperDataIngestionTool",
+                    "description": "Correctly extracted `WebScraperDataIngestionTool` with all the required parameters with correct types",
+                    "parameters": {
+                        "properties": {
+                            "urls_file_path": {
+                                "description": "The file path to the text file containing URLs to scrape.",
+                                "title": "Urls File Path",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "urls_file_path"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            }
+        ],
+        "response_format": "auto",
+        "temperature": 0.3,
+        "tool_resources": {
+            "code_interpreter": null,
+            "file_search": {
+                "vector_store_ids": [
+                    "vs_yUEIXvLSasWu8sM9Ka1evYSW"
+                ]
+            }
+        },
+        "top_p": 1.0
+    },
+    {
+        "id": "asst_8IPZ4X3jSlo3yjEZLLDydaJb",
+        "created_at": 1731617795,
+        "description": "Acts as the overseer and communicator across the agency, ensuring alignment with the agency's goals.",
+        "instructions": "# Genesis Agency Manifesto\n\nYou are a part of a Genesis Agency for a framework called Agency Swarm. The goal of your agency is to create other agencies within this framework. Below is a brief description of the framework.\n\n**Agency Swarm started as a desire and effort of Arsenii Shatokhin (aka VRSEN) to fully automate his AI Agency with AI. By building this framework, we aim to simplify the AI agent creation process and enable anyone to create a collaborative swarms of agents (Agencies), each with distinct roles and capabilities. These agents must function autonomously, yet collaborate with other agents to achieve a common goal.**\n\nKeep in mind that communication with the other agents within your agency via the `SendMessage` tool is synchronous. Other agents will not be executing any tasks post response. Please instruct the recipient agent to continue its execution, if needed. Do not report to the user before the recipient agent has completed its task. If the agent proposes the next steps, for example, you must instruct the recipient agent to execute them.\n\n\n\n# GenesisCEO Agent Instructions\n\nAs a Genesis CEO Agent within the Agency Swarm framework, your mission is to help users define the structure of their agency and create the initial agents.\n\n1. Pick a name for the agency, determine its goals and mission. Ask the user for any clarification if needed.\n2. Propose an initial structure for the agency, including the roles of the agents, their communication flows and what APIs or Tools each agent can use, if specified by the user. Focus on creating at most 2 agents, plus CEO, unless instructed otherwise by the user. Do not name the CEO agent GenesisCEO. It's name must be tailored for the purpose of the agency. Output the code snippet like below. Adjust it accordingly, based on user's input.\n3. Upon confirmation of the agency structure, use `CreateAgencyFolder` tool to create a folder for the agency. If any modifications are required please use this tool again with the same agency name and it will overwrite the existing folder.\n4. Tell AgentCreator to create these agents one by one, starting with the CEO. Each agent should be sent in a separate message using the `SendMessage` tool. Please make sure to include the agent description, summary of the processes it needs to perform and the APIs or Tools that it can use via the message parameter.\n5. Once all agents are created, please use the `FinalizeAgency` tool, and tell the user that he can now navigate to the agency folder and start it with `python agency.py` command.\n\n\n### Example of communication flows\n\nHere is an example of how communication flows are defined in agency swarm. Essentially, agents that are inside a double array can initiate communication with each other. Agents that are in the top level array can communicate with the user. \n\n```python\nagency = Agency([\n    ceo, dev,  # CEO and Developer will be the entry point for communication with the user\n    [ceo, dev],  # CEO can initiate communication with Developer\n    [ceo, va],   # CEO can initiate communication with Virtual Assistant\n    [dev, va]    # Developer can initiate communication with Virtual Assistant\n], shared_instructions='agency_manifesto.md') # shared instructions for all agents\n```\nKeep in mind that this is just an example and you should replace it with the actual agents you are creating. Also, propose which tools or APIs each agent should have access to, if any with a brief description of each role. Then, after the user's confirmation, send each agent to the AgentCreator one by one, starting with the CEO.",
+        "metadata": {},
+        "model": "gpt-4o-2024-08-06",
+        "name": "GenesisCEO",
+        "object": "assistant",
+        "tools": [
+            {
+                "function": {
+                    "name": "CreateAgencyFolder",
+                    "description": "This tool creates or modifies an agency folder. You can use it again with the same agency_name to modify a previously created agency, if the user wants to change the agency chart or the manifesto.",
+                    "parameters": {
+                        "properties": {
+                            "agency_name": {
+                                "description": "Name of the agency to be created. Must not contain spaces or special characters.",
+                                "examples": [
+                                    "AgencyName",
+                                    "MyAgency",
+                                    "ExampleAgency"
+                                ],
+                                "title": "Agency Name",
+                                "type": "string"
+                            },
+                            "agency_chart": {
+                                "description": "Agency chart to be passed into the Agency class.",
+                                "examples": [
+                                    "[ceo, [ceo, dev], [ceo, va], [dev, va]]"
+                                ],
+                                "title": "Agency Chart",
+                                "type": "string"
+                            },
+                            "manifesto": {
+                                "description": "Manifesto for the agency, describing its goals and additional context shared by all agents in markdown format. It must include information about the working environment, the mission and the goals of the agency. Do not add descriptions of the agents themselves or the agency structure.",
+                                "title": "Manifesto",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "agency_chart",
+                            "agency_name",
+                            "manifesto"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            },
+            {
+                "function": {
+                    "name": "FinalizeAgency",
+                    "description": "This tool finalizes the agency structure and it's imports. Please make sure to use at only at the very end, after all agents have been created.",
+                    "parameters": {
+                        "properties": {
+                            "agency_path": {
+                                "default": null,
+                                "description": "Path to the agency folder. Defaults to the agency currently being created.",
+                                "title": "Agency Path",
+                                "type": "string"
+                            }
+                        },
+                        "type": "object",
+                        "required": []
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            },
+            {
+                "function": {
+                    "name": "ReadRequirements",
+                    "description": "Use this tool to read the agency requirements if user provides them as a file.",
+                    "parameters": {
+                        "properties": {
+                            "file_path": {
+                                "description": "The path to the file that needs to be read.",
+                                "title": "File Path",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "file_path"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
             },
             {
                 "function": {
@@ -384,9 +637,9 @@
                     "parameters": {
                         "$defs": {
                             "recipient": {
-                                "const": "KnowledgeRetrievalAgent",
+                                "const": "AgentCreator",
                                 "enum": [
-                                    "KnowledgeRetrievalAgent"
+                                    "AgentCreator"
                                 ],
                                 "title": "recipient",
                                 "type": "string"
@@ -404,7 +657,335 @@
                                         "$ref": "#/$defs/recipient"
                                     }
                                 ],
-                                "description": "KnowledgeRetrievalAgent: The KnowledgeRetrievalAgent retrieves relevant information from the knowledge base to assist with context-specific questions. It scrapes data from specified URLs in urls.txt and additional files like cursorrules.txt, adds them to the Pinecone vector database using OpenAI's embedding models. It parses and indexes documents, handles requests for clarifications or topic-specific information, and dynamically supplies the InterviewCoordinator with pertinent information for deeper interview questions.\n"
+                                "description": "AgentCreator: This agent is responsible for creating new agents for the agency.\n"
+                            },
+                            "message": {
+                                "description": "Specify the task required for the recipient agent to complete. Focus on clarifying what the task entails, rather than providing exact instructions.",
+                                "title": "Message",
+                                "type": "string"
+                            },
+                            "message_files": {
+                                "anyOf": [
+                                    {
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "default": null,
+                                "description": "A list of file ids to be sent as attachments to this message. Only use this if you have the file id that starts with 'file-'.",
+                                "examples": [
+                                    "file-1234",
+                                    "file-5678"
+                                ],
+                                "title": "Message Files"
+                            },
+                            "additional_instructions": {
+                                "anyOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "default": null,
+                                "description": "Additional context or instructions for the recipient agent about the task. For example, additional information provided by the user or other agents.",
+                                "title": "Additional Instructions"
+                            }
+                        },
+                        "required": [
+                            "message",
+                            "my_primary_instructions",
+                            "recipient"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            }
+        ],
+        "response_format": "auto",
+        "temperature": 0.4,
+        "tool_resources": {
+            "code_interpreter": null,
+            "file_search": null
+        },
+        "top_p": 1.0
+    },
+    {
+        "id": "asst_ElPQ8HgJZGNkKEls4aMwuQ8X",
+        "created_at": 1731617796,
+        "description": "This agent is responsible for creating new tools for the agency using python code.",
+        "instructions": "# Genesis Agency Manifesto\n\nYou are a part of a Genesis Agency for a framework called Agency Swarm. The goal of your agency is to create other agencies within this framework. Below is a brief description of the framework.\n\n**Agency Swarm started as a desire and effort of Arsenii Shatokhin (aka VRSEN) to fully automate his AI Agency with AI. By building this framework, we aim to simplify the AI agent creation process and enable anyone to create a collaborative swarms of agents (Agencies), each with distinct roles and capabilities. These agents must function autonomously, yet collaborate with other agents to achieve a common goal.**\n\nKeep in mind that communication with the other agents within your agency via the `SendMessage` tool is synchronous. Other agents will not be executing any tasks post response. Please instruct the recipient agent to continue its execution, if needed. Do not report to the user before the recipient agent has completed its task. If the agent proposes the next steps, for example, you must instruct the recipient agent to execute them.\n\n\n\n# ToolCreator Agent Instructions\n\nAs a ToolCreator Agent within the Agency Swarm framework, your mission is to develop tools that enhance the capabilities of other agents. These tools are pivotal for enabling agents to communicate, collaborate, and efficiently achieve their collective objectives. Below are detailed instructions to guide you through the process of creating tools, ensuring they are both functional and align with the framework's standards.\n\n**Here are your primary instructions:**\n1. Determine which tools the agent must utilize to perform it's role. Make an educated guess if the user has not specified any tools or APIs. Remember, all tools must utilize actual APIs or SDKs, and not hypothetical examples.\n2. Create these tools one at a time, using `CreateTool` tool.\n3. Test each tool with the `TestTool` function to ensure it is working as expected. Do not ask the user, always test the tool yourself, if it does not require any API keys and all the inputs can be mocked.\n4. Only after all the necessary tools are created, notify the user.\n\n",
+        "metadata": {},
+        "model": "gpt-4o-2024-08-06",
+        "name": "ToolCreator",
+        "object": "assistant",
+        "tools": [
+            {
+                "function": {
+                    "name": "CreateTool",
+                    "description": "This tool creates other custom tools for the agent, based on your requirements and details.",
+                    "parameters": {
+                        "properties": {
+                            "agent_name": {
+                                "description": "Name of the agent to create the tool for.",
+                                "title": "Agent Name",
+                                "type": "string"
+                            },
+                            "tool_name": {
+                                "description": "Name of the tool class in camel case.",
+                                "examples": [
+                                    "ExampleTool"
+                                ],
+                                "title": "Tool Name",
+                                "type": "string"
+                            },
+                            "requirements": {
+                                "description": "The comprehensive requirements explaning the primary functionality of the tool. It must not contain any code or implementation details.",
+                                "title": "Requirements",
+                                "type": "string"
+                            },
+                            "details": {
+                                "default": null,
+                                "description": "Additional details or error messages, class, function, and variable names.",
+                                "title": "Details",
+                                "type": "string"
+                            },
+                            "mode": {
+                                "description": "The mode of operation for the tool. 'write' is used to create a new tool or overwrite an existing one. 'modify' is used to modify an existing tool.",
+                                "enum": [
+                                    "write",
+                                    "modify"
+                                ],
+                                "title": "Mode",
+                                "type": "string"
+                            },
+                            "agency_name": {
+                                "default": null,
+                                "description": "Name of the agency to create the tool for. Defaults to the agency currently being created.",
+                                "title": "Agency Name",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "agent_name",
+                            "mode",
+                            "requirements",
+                            "tool_name"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            },
+            {
+                "function": {
+                    "name": "TestTool",
+                    "description": "This tool tests other tools defined in tools.py file with the given arguments. Make sure to define the run method before testing.",
+                    "parameters": {
+                        "properties": {
+                            "agent_name": {
+                                "description": "Name of the agent to test the tool for.",
+                                "title": "Agent Name",
+                                "type": "string"
+                            },
+                            "chain_of_thought": {
+                                "description": "Think step by step to determine the correct arguments for testing.",
+                                "title": "Chain Of Thought",
+                                "type": "string"
+                            },
+                            "tool_name": {
+                                "description": "Name of the tool to be run.",
+                                "title": "Tool Name",
+                                "type": "string"
+                            },
+                            "arguments": {
+                                "anyOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "description": "Arguments to be passed to the tool for testing in serialized JSON format.",
+                                "title": "Arguments"
+                            },
+                            "agency_name": {
+                                "default": null,
+                                "description": "Name of the agency to create the tool for. Defaults to the agency currently being created.",
+                                "title": "Agency Name",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "agent_name",
+                            "arguments",
+                            "chain_of_thought",
+                            "tool_name"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            }
+        ],
+        "response_format": "auto",
+        "temperature": 0.0,
+        "tool_resources": {
+            "code_interpreter": null,
+            "file_search": null
+        },
+        "top_p": 1.0
+    },
+    {
+        "id": "asst_5yUqKTMUkgI7ueC1xH1twpKn",
+        "created_at": 1731617797,
+        "description": "This agent is responsible for creating new agents for the agency.",
+        "instructions": "# Genesis Agency Manifesto\n\nYou are a part of a Genesis Agency for a framework called Agency Swarm. The goal of your agency is to create other agencies within this framework. Below is a brief description of the framework.\n\n**Agency Swarm started as a desire and effort of Arsenii Shatokhin (aka VRSEN) to fully automate his AI Agency with AI. By building this framework, we aim to simplify the AI agent creation process and enable anyone to create a collaborative swarms of agents (Agencies), each with distinct roles and capabilities. These agents must function autonomously, yet collaborate with other agents to achieve a common goal.**\n\nKeep in mind that communication with the other agents within your agency via the `SendMessage` tool is synchronous. Other agents will not be executing any tasks post response. Please instruct the recipient agent to continue its execution, if needed. Do not report to the user before the recipient agent has completed its task. If the agent proposes the next steps, for example, you must instruct the recipient agent to execute them.\n\n\n\n# AgentCreator Agent Instructions\n\nYou are an agent that creates other agents as instructed by the user. \n\nThe user will communicate to you each agent that needs to be created. Below are your instructions that needs to be followed for each agent communicated by the user.\n\n**Primary Instructions:**\n1. First, read the manifesto using `ReadManifesto` tool if you have not already done so. This file contains the agency manifesto that describes the agency's purpose and goals.\n2. If a similar agent to the requested one is accessible through the `ImportAgent` tool, import this agent and inform the user that the agent has been created. Skip the following steps.\n3. If not, create a new agent using `CreateAgentTemplate` tool. \n4. Tell the `ToolCreator` agent to create tools or APIs for this agent. Make sure to also communicate the agent description, name and a summary of the processes that it needs to perform. CEO Agents do not need to utilize any tools, so you can skip this and the following steps.\n5. If there are no issues and tools have been successfully created, notify the user that the agent has been created. Otherwise, try to resolve any issues with the tool creator before reporting back to the user.\n6. Repeat this process for each agent that needs to be created, as instructed by the user.",
+        "metadata": {},
+        "model": "gpt-4o-2024-08-06",
+        "name": "AgentCreator",
+        "object": "assistant",
+        "tools": [
+            {
+                "function": {
+                    "name": "ImportAgent",
+                    "description": "This tool imports an existing agent from agency swarm framework. Please make sure to first use the GetAvailableAgents tool to get the list of available agents.",
+                    "parameters": {
+                        "properties": {
+                            "agent_name": {
+                                "description": "Available agents:\n\n'BrowsingAgent': This agent is designed to navigate and search web effectively.\n'Devid': Devid is an AI software engineer capable of performing advanced coding tasks.\n",
+                                "title": "Agent Name",
+                                "type": "string"
+                            },
+                            "agency_path": {
+                                "default": null,
+                                "description": "Path to the agency where the agent will be imported. Default is the current agency.",
+                                "title": "Agency Path",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "agent_name"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            },
+            {
+                "function": {
+                    "name": "CreateAgentTemplate",
+                    "description": "This tool creates a template folder for a new agent. Always use this tool first, before creating tools or APIs for the agent.",
+                    "parameters": {
+                        "properties": {
+                            "agent_name": {
+                                "description": "Name of the agent to be created. Cannot include special characters or spaces.",
+                                "title": "Agent Name",
+                                "type": "string"
+                            },
+                            "agent_description": {
+                                "description": "Description of the agent to be created.",
+                                "title": "Agent Description",
+                                "type": "string"
+                            },
+                            "instructions": {
+                                "description": "Instructions for the agent to be created in markdown format. Instructions should include a decription of the role and a specific step by step process that this agent need to perform in order to execute the tasks. The process must also be aligned with all the other agents in the agency. Agents should be able to collaborate with each other to achieve the common goal of the agency.",
+                                "examples": [
+                                    "# Web Developer Agent Instructions\n\nYou are an agent that builds responsive web applications using Next.js and Material-UI (MUI). You must use the tools provided to navigate directories, read, write, modify files, and execute terminal commands. \n\n### Primary Instructions:\n1. Check the current directory before performing any file operations with `CheckCurrentDir` and `ListDir` tools.\n2. Write or modify the code for the website using the `FileWriter` or `ChangeLines` tools. Make sure to use the correct file paths and file names. Read the file first if you need to modify it.\n3. Make sure to always build the app after performing any modifications to check for errors before reporting back to the user. Keep in mind that all files must be reflected on the current website\n4. Implement any adjustements or improvements to the website as requested by the user. If you get stuck, rewrite the whole file using the `FileWriter` tool, rather than use the `ChangeLines` tool.\n"
+                                ],
+                                "title": "Instructions",
+                                "type": "string"
+                            },
+                            "default_tools": {
+                                "default": [],
+                                "description": "List of default tools to be included in the agent. Possible values are ['CodeInterpreter'].CodeInterpreter allows the agent to execute python code in a remote python environment.",
+                                "example": [
+                                    "CodeInterpreter"
+                                ],
+                                "items": {
+                                    "type": "string"
+                                },
+                                "title": "Default Tools",
+                                "type": "array"
+                            },
+                            "agency_name": {
+                                "default": null,
+                                "description": "Name of the agency to create the tool for. Defaults to the agency currently being created.",
+                                "title": "Agency Name",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "agent_description",
+                            "agent_name",
+                            "instructions"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            },
+            {
+                "function": {
+                    "name": "ReadManifesto",
+                    "description": "This tool reads a manifesto for the agency being created from a markdown file.",
+                    "parameters": {
+                        "properties": {
+                            "agency_name": {
+                                "default": null,
+                                "description": "Name of the agency to create the tool for. Defaults to the agency currently being created.",
+                                "title": "Agency Name",
+                                "type": "string"
+                            }
+                        },
+                        "type": "object",
+                        "required": []
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            },
+            {
+                "function": {
+                    "name": "SendMessage",
+                    "description": "Use this tool to facilitate direct, synchronous communication between specialized agents within your agency. When you send a message using this tool, you receive a response exclusively from the designated recipient agent. To continue the dialogue, invoke this tool again with the desired recipient agent and your follow-up message. Remember, communication here is synchronous; the recipient agent won't perform any tasks post-response. You are responsible for relaying the recipient agent's responses back to the user, as the user does not have direct access to these replies. Keep engaging with the tool for continuous interaction until the task is fully resolved. Do not send more than 1 message at a time.",
+                    "parameters": {
+                        "$defs": {
+                            "recipient": {
+                                "const": "ToolCreator",
+                                "enum": [
+                                    "ToolCreator"
+                                ],
+                                "title": "recipient",
+                                "type": "string"
+                            }
+                        },
+                        "properties": {
+                            "my_primary_instructions": {
+                                "description": "Please repeat your primary instructions step-by-step, including both completed and the following next steps that you need to perform. For multi-step, complex tasks, first break them down into smaller steps yourself. Then, issue each step individually to the recipient agent via the message parameter. Each identified step should be sent in separate message. Keep in mind, that the recipient agent does not have access to these instructions. You must include recipient agent-specific instructions in the message or additional_instructions parameters.",
+                                "title": "My Primary Instructions",
+                                "type": "string"
+                            },
+                            "recipient": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/$defs/recipient"
+                                    }
+                                ],
+                                "description": "ToolCreator: This agent is responsible for creating new tools for the agency using python code.\n"
                             },
                             "message": {
                                 "description": "Specify the task required for the recipient agent to complete. Focus on clarifying what the task entails, rather than providing exact instructions.",
@@ -460,58 +1041,56 @@
         "response_format": "auto",
         "temperature": 0.3,
         "tool_resources": {
-            "code_interpreter": {
-                "file_ids": [
-                    "file-Tl2TbteTB2KCJd21Qh0p7RyT"
-                ]
-            },
+            "code_interpreter": null,
             "file_search": null
         },
         "top_p": 1.0
     },
     {
-        "id": "asst_nzEYQiZCohmHefyR55N4wBQU",
-        "created_at": 1731550864,
-        "description": "The KnowledgeRetrievalAgent retrieves relevant information from the knowledge base to assist with context-specific questions. It scrapes data from specified URLs in urls.txt and additional files like cursorrules.txt, adds them to the Pinecone vector database using OpenAI's embedding models. It parses and indexes documents, handles requests for clarifications or topic-specific information, and dynamically supplies the InterviewCoordinator with pertinent information for deeper interview questions.",
-        "instructions": "### InterviewBot Agency Manifesto\n\n#### Mission:\n\nTo streamline and elevate the technical interview process by leveraging an AI-powered multi-agent system. Using Agency Swarm, the InterviewBot will conduct interactive, adaptive technical interviews with developer candidates, providing real-time assessment and feedback based on predefined criteria. This approach enables efficient, data-driven evaluations of candidate skills and knowledge.\n\n#### Goals:\n\n* Conduct seamless technical interviews, including assessments in Python programming, APIs, cloud, containerization, and the Agency Swarm framework.\n* Reference relevant documentation to support interview questions and clarify technical concepts on request.\n* Automate candidate assessment by recording and scoring responses to predefined questions and saving the results for further review.\n* Facilitate an interactive interview experience using Gradio UI for straightforward candidate interaction.\n\n# KnowledgeRetrievalAgent Instructions\n\nYou are an agent that retrieves relevant information from the knowledge base to assist with context-specific questions. Your primary responsibilities include scraping data from specified URLs in urls.txt and additional files like cursorrules.txt, adding them to the Pinecone vector database using OpenAI's embedding models, parsing and indexing documents provided, handling requests for clarifications or topic-specific information, and dynamically supplying the InterviewCoordinator with pertinent information for deeper interview questions.\n\n### Primary Instructions:\n1. Scrape data from specified URLs in urls.txt and additional files like cursorrules.txt.\n2. Add the scraped data to the Pinecone vector database using OpenAI's embedding models.\n3. Parse and index documents provided to create a searchable knowledge base.\n4. Handle requests for clarifications or topic-specific information from the InterviewCoordinator.\n5. Use a simple RAG (Retrieval-Augmented Generation) system, potentially with Faiss or another vector database for document indexing and retrieval.\n6. Utilize the OpenAI Chat Completion API for advanced responses or generating clarifications when additional knowledge retrieval is needed.\n7. Dynamically supply the InterviewCoordinator with pertinent information for deeper interview questions.\n8. Ensure all interactions and retrieved information are logged for future reference and analysis.",
+        "id": "asst_wWRZfUtBA4pzOIMKOdmuGWcj",
+        "created_at": 1731638063,
+        "description": "The Feedback Analyzer analyzes candidate responses and provides real-time assessment and feedback based on predefined criteria within the InterviewBotAgency.",
+        "instructions": "\n### **InterviewBot Agency Manifesto**\n\n#### **Mission:**\n\nTo transform and enhance the technical interview process by harnessing a multi-agent AI system that interacts adaptively with developer candidates, delivering real-time feedback and data-driven assessment. Through the Agency Swarm framework, InterviewBot dynamically conducts technical interviews, using scoring, evaluation, and knowledge retrieval to measure candidate proficiency effectively.\n\n#### **Goals:**\n\n1. **Conduct Adaptive Technical Interviews:**\n   * Cover key technical areas, including Python, API integration, cloud architecture, containerization, and the Agency Swarm framework.\n   * Prompt candidates with tailored follow-up questions immediately upon response and allow them the flexibility to skip questions as needed.\n2. **Reference and Retrieve Documentation:**\n   * Use relevant documentation to support questions and provide clarifications on technical topics to enhance the interview experience.\n   * Automate documentation look-up for any interview topics that require in-depth information to prevent interruptions and sustain engagement.\n3. **Automate Candidate Scoring and Assessment:**\n   * Automatically record, analyze, and score candidate responses according to predefined rubrics.\n   * Store response data for easy reference, tracking, and review in post-interview analysis.\n4. **Deliver Feedback and Post-Interview Reports:**\n   * Provide a real-time evaluation summary using scoring rubrics for key skill areas.\n   * Leverage `FeedbackAnalyzer` for a comprehensive overview that includes strengths, areas for improvement, and recommendations.\n5. **User-Friendly Gradio Interface:**\n   * Use the Gradio interface to create an accessible and seamless interaction space for candidates to submit answers, request information, and receive immediate feedback.\n\n\n# Feedback Analyzer Agent Instructions\n\nYou are the Feedback Analyzer responsible for analyzing candidate responses and providing real-time assessment and feedback based on predefined criteria within the InterviewBotAgency.\n\n### Primary Instructions:\n1. Analyze candidate responses during the interview process using predefined criteria.\n2. Generate real-time feedback and assessments based on the analysis.\n3. Ensure that the feedback is constructive, clear, and aligned with the agency's mission of data-driven evaluations.\n4. Collaborate with the Interview Coordinator to ensure seamless integration of feedback into the interview process.\n5. Utilize tools for assessment algorithms and feedback generation to support data-driven evaluations of candidate skills and knowledge.",
         "metadata": {},
         "model": "gpt-4o-2024-08-06",
-        "name": "KnowledgeRetrievalAgent",
+        "name": "FeedbackAnalyzer",
         "object": "assistant",
         "tools": [
             {
-                "type": "file_search",
-                "file_search": {
-                    "max_num_results": null,
-                    "ranking_options": {
-                        "score_threshold": 0.0,
-                        "ranker": "default_2024_08_21"
-                    }
-                }
-            },
-            {
                 "function": {
-                    "name": "DocumentParserIndexerTool",
-                    "description": "This tool parses and indexes documents for efficient searching and retrieval.\nIt reads various document formats, extracts text content, and creates an index\nfor efficient searching and retrieval of relevant information.",
+                    "name": "AssessmentAlgorithm",
+                    "description": "A tool to implement algorithms for assessing candidate responses based on predefined criteria.\nIt evaluates the quality of responses, assigns scores, and identifies areas of improvement, supporting data-driven evaluations.",
                     "parameters": {
                         "properties": {
-                            "document_paths": {
-                                "description": "A list of file paths to the documents to be parsed and indexed.",
-                                "items": {
-                                    "type": "string"
-                                },
-                                "title": "Document Paths",
-                                "type": "array"
-                            },
-                            "index_file_path": {
-                                "description": "The file path where the index will be saved as a JSON file.",
-                                "title": "Index File Path",
-                                "type": "string"
+                            "criteria_weights": {
+                                "description": "A dictionary of criteria and their corresponding weights for evaluation.",
+                                "title": "Criteria Weights",
+                                "type": "object"
                             }
                         },
                         "required": [
-                            "document_paths",
-                            "index_file_path"
+                            "criteria_weights"
+                        ],
+                        "type": "object"
+                    },
+                    "strict": false
+                },
+                "type": "function"
+            },
+            {
+                "function": {
+                    "name": "FeedbackGenerator",
+                    "description": "A tool to generate feedback for candidates based on assessment results.\nIt provides constructive feedback, highlighting strengths and areas for improvement, ensuring clarity and actionability.",
+                    "parameters": {
+                        "properties": {
+                            "criteria_descriptions": {
+                                "description": "A dictionary of criteria with descriptions for feedback generation.",
+                                "title": "Criteria Descriptions",
+                                "type": "object"
+                            }
+                        },
+                        "required": [
+                            "criteria_descriptions"
                         ],
                         "type": "object"
                     },
@@ -524,11 +1103,7 @@
         "temperature": 0.3,
         "tool_resources": {
             "code_interpreter": null,
-            "file_search": {
-                "vector_store_ids": [
-                    "vs_yUEIXvLSasWu8sM9Ka1evYSW"
-                ]
-            }
+            "file_search": null
         },
         "top_p": 1.0
     }

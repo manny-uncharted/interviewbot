@@ -1,42 +1,67 @@
 from agency_swarm.tools import BaseTool
 from pydantic import Field
+from typing import Optional
 
 class CommunicationTool(BaseTool):
     """
-    This tool facilitates communication with the EvaluationAgent and KnowledgeRetrievalAgent.
+    This tool facilitates communication with other agents like the EvaluationAgent and KnowledgeRetrievalAgent.
     It can send and receive messages, ensuring smooth collaboration between agents during the interview process.
     """
 
     message_to_send: str = Field(
         ..., description="The message to be sent to another agent."
     )
-    received_message: str = Field(
+    received_message: Optional[str] = Field(
         None, description="The message received from another agent."
     )
 
-    def send_message(self, recipient_agent):
+    # Simulated message store for inter-agent communication
+    message_store = {}
+
+    def send_message(self, recipient_agent: str):
         """
         Sends a message to the specified recipient agent.
+        
+        Args:
+            recipient_agent (str): The name of the agent to send the message to.
+            
+        Returns:
+            str: Confirmation that the message has been sent.
         """
-        # Implement sending message logic here, such as using a messaging system
-        # Placeholder for actual messaging code
-        self.received_message = f"Message sent to {recipient_agent}: {self.message_to_send}"
-        print(self.received_message)
+        # Store the message in the shared message store
+        CommunicationTool.message_store[recipient_agent] = self.message_to_send
+        return f"Message sent to {recipient_agent}: {self.message_to_send}"
 
-    def receive_message(self, sender_agent):
+    def receive_message(self, sender_agent: str):
         """
         Receives a message from the specified sender agent.
+        
+        Args:
+            sender_agent (str): The name of the agent from whom to receive the message.
+        
+        Returns:
+            str: The received message content, or an indication if no message is available.
         """
-        # Simulate receiving a message from sender agent
-        self.received_message = f"Message received from {sender_agent}: [Simulated message content]"
-        print(self.received_message)
+        if sender_agent in CommunicationTool.message_store:
+            self.received_message = CommunicationTool.message_store.pop(sender_agent)
+            return f"Message received from {sender_agent}: {self.received_message}"
+        else:
+            return f"No new message from {sender_agent}."
 
-    def run(self):
+    def run(self, action: str, agent_name: str):
         """
-        Demonstrates sending and receiving messages between agents.
+        Executes a communication action, either sending or receiving a message, based on the specified action.
+        
+        Args:
+            action (str): Action to perform, either 'send' or 'receive'.
+            agent_name (str): Name of the agent to send to or receive from.
+        
+        Returns:
+            str: The result of the send or receive action.
         """
-        self.send_message("EvaluationAgent")
-        self.receive_message("KnowledgeRetrievalAgent")
-        return "Communication between agents completed successfully"
-
-
+        if action == "send":
+            return self.send_message(agent_name)
+        elif action == "receive":
+            return self.receive_message(agent_name)
+        else:
+            return "Invalid action. Please specify 'send' or 'receive'."

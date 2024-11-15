@@ -1,7 +1,7 @@
 import unittest
-from InterviewCoordinator.tools.CandidateInteractionTool import CandidateInteractionTool
-from InterviewCoordinator.tools.CommunicationTool import CommunicationTool
-from InterviewCoordinator.tools.InterviewFlowManagerTool import InterviewFlowManagerTool
+from InterviewBot.InterviewCoordinator.tools.CandidateInteractionTool import CandidateInteractionTool
+from InterviewBot.InterviewCoordinator.tools.CommunicationTool import CommunicationTool
+from InterviewBot.InterviewCoordinator.tools.InterviewFlowManagerTool import InterviewFlowManagerTool
 from InterviewCoordinator.tools.GradioInterfaceTool import GradioInterfaceTool
 
 

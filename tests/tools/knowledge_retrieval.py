@@ -1,9 +1,9 @@
 import unittest
 from unittest.mock import patch, MagicMock
 from KnowledgeRetrievalAgent.tools.ClarificationRequestHandlerTool import ClarificationRequestHandlerTool
-from KnowledgeRetrievalAgent.tools.DocumentParserIndexerTool import DocumentParserIndexerTool
-from KnowledgeRetrievalAgent.tools.InformationSupplierTool import InformationSupplierTool
-from KnowledgeRetrievalAgent.tools.WebScraperDataIngestionTool import WebScraperDataIngestionTool
+from InterviewBot.utils.DocumentParserIndexerTool import DocumentParserIndexerTool
+from InterviewBot.utils.InformationSupplierTool import InformationSupplierTool
+from InterviewBot.utils.WebScraperDataIngestionTool import WebScraperDataIngestionTool
 
 class TestClarificationRequestHandlerTool(unittest.TestCase):
     @patch('openai.Embedding.create')
