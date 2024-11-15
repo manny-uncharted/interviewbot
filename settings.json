@@ -361,7 +361,8 @@
                                 "type": "string"
                             },
                             "file_path": {
-                                "description": "The file path to store the JSON data.",
+                                "default": "./candidates/",
+                                "description": "The file path to store the JSON data. Defaults to 'feedback_data.json'.",
                                 "title": "File Path",
                                 "type": "string"
                             }
@@ -369,7 +370,6 @@
                         "required": [
                             "candidate_name",
                             "feedback",
-                            "file_path",
                             "scores"
                         ],
                         "type": "object"

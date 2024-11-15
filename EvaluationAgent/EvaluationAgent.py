@@ -7,7 +7,7 @@ class EvaluationAgent(Agent):
             name="EvaluationAgent",
             description="The EvaluationAgent evaluates and scores candidate responses in real-time using an LLM and the provided Candidate_Criteria_Sheet.xlsx. It analyzes each response for relevance, accuracy, and completeness, scores responses based on predefined criteria, and stores scores and feedback in a structured JSON file for each candidate.",
             instructions="./instructions.md",
-            files_folder="./files",
+            files_folder="InterviewBot/EvaluationAgent/files",
             schemas_folder="./schemas",
             tools=[CodeInterpreter],
             tools_folder="./tools",
